@@ -1,0 +1,15 @@
+﻿@model BlogPage2.Models.Post
+@using Microsoft.AspNetCore.Identity
+@using BlogPage2.Areas.Identity.Data
+
+@inject UserManager<BlogPage2User> UserManager
+<h1>People who liked: @Model.Title</h1>
+
+<ul>
+    @foreach (var like in Model.Likes)
+    {
+        <li>@like.AppUser</li>
+    }
+</ul>
+
+<a asp-action="Index">Back to Posts</a>

@@ -1,0 +1,79 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using BlogPage2.Areas.Identity.Data
+@inject UserManager<BlogPage2User> UserManager
+@model BlogPage2.ViewModels.PostCreateViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1 class="text-center text-primary">Create Post</h1>
+
+<h4 class="mb-4 text-center">Fill in the details below</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Title" class="control-label" style="font-weight: bold;"></label>
+                <input asp-for="Post.Title" class="form-control" placeholder="Enter post title" style="border-radius: 5px;" />
+                <span asp-validation-for="Post.Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <input type="hidden" asp-for="Post.AppUser" value="@UserManager.GetUserId(User)" />
+                <label class="control-label" style="font-weight: bold;">Username</label>
+                <input type="text" class="form-control" value="@UserManager.GetUserName(User)" readonly style="background-color: #e9ecef; border-radius: 5px;" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.PostContent" class="control-label" style="font-weight: bold;"></label>
+                <textarea asp-for="Post.PostContent" class="form-control" rows="5" placeholder="Write your content here" style="border-radius: 5px;"></textarea>
+                <span asp-validation-for="Post.PostContent" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.File" class="control-label" style="font-weight: bold;">Upload Image</label>
+                <input asp-for="Post.File" type="file" class="form-control" style="border-radius: 5px;" />
+                <span asp-validation-for="Post.File" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="SelectedTags" class="control-label" style="font-weight: bold;">Tags</label>
+                <select asp-for="SelectedTags" class="form-control" asp-items="Model.TagList" multiple style="border-radius: 5px;"></select>
+                <span asp-validation-for="SelectedTags" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="NewTags" class="control-label" style="font-weight: bold;">New Tags (space separated, optional)</label>
+                <input asp-for="NewTags" class="form-control" placeholder="e.g., tag1 tag2" style="border-radius: 5px;" />
+                <span asp-validation-for="NewTags" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="NewCategories" class="control-label" style="font-weight: bold;">New Categories (space separated, optional)</label>
+                <input asp-for="NewCategories" class="form-control" placeholder="e.g., fashion sport " style="border-radius: 5px;" />
+                <span asp-validation-for="NewCategories" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="SelectedCategories" class="control-label" style="font-weight: bold;">Categories</label>
+                <select asp-for="SelectedCategories" class="form-control" asp-items="Model.CategoryList" multiple style="border-radius: 5px;"></select>
+                <span asp-validation-for="SelectedCategories" class="text-danger"></span>
+            </div>
+
+            <div class="form-group d-flex justify-content-between">
+                <input type="submit" value="Create" class="btn btn-success" style="border-radius: 5px; width: 48%;" />
+                <a asp-action="Index" class="btn btn-secondary" style="border-radius: 5px; width: 48%;">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

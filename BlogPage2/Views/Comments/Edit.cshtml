@@ -1,0 +1,146 @@
+﻿@model BlogPage2.ViewModels.CommentViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .form-container {
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
+
+            .form-container img {
+                max-width: 200px;
+                max-height: 200px;
+                border-radius: 5px;
+            }
+
+        .btn-primary {
+            width: 100%;
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background-color: #0056b3;
+                border-color: #004085;
+            }
+
+        .btn-secondary {
+            width: 100%;
+            background-color: #6c757d;
+            border-color: #6c757d;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+            .btn-secondary:hover {
+                background-color: #5a6268;
+                border-color: #545b62;
+            }
+
+        .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+            .btn-outline-danger:hover {
+                background-color: #dc3545;
+                color: #fff;
+                border-color: #dc3545;
+            }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="form-container">
+            <h1 class="mb-4">Edit Comment</h1>
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Comment.Id" />
+                <input type="hidden" asp-for="ExistingImagePath" />
+                <div class="form-group">
+                    <label asp-for="Comment.PostId" class="control-label">Post ID</label>
+                    <input asp-for="Comment.PostId" class="form-control" />
+                    <span asp-validation-for="Comment.PostId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Comment.CommentContent" class="control-label">Comment Content</label>
+                    <textarea asp-for="Comment.CommentContent" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Comment.CommentContent" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Comment.AppUser" class="control-label">App User</label>
+                    <input asp-for="Comment.AppUser" class="form-control" readonly />
+                    <span asp-validation-for="Comment.AppUser" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="File" class="control-label">Choose Image</label>
+                    <input type="file" asp-for="File" class="form-control-file" accept="image/*" onchange="previewImage(event)" />
+                    <span asp-validation-for="File" class="text-danger"></span>
+                </div>
+                <div id="imagePreview" class="mb-3">
+                    @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+                    {
+                        <div>
+                            <p>Current Image:</p>
+                            <img src="@Url.Content("~/images/" + Model.ExistingImagePath)" alt="Current Image" />
+                            <div class="mt-2">
+                                <label>
+                                    <input type="checkbox" asp-for="DeleteImage" />
+                                    Delete current image
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-outline-dark">Save</button>
+                </div>
+            </form>
+        </div>
+        <div class="mt-3">
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    @section Scripts {
+        <script>
+            function previewImage(event) {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    var output = document.getElementById('imagePreview');
+                    output.innerHTML = '<img src="' + reader.result + '" style="max-width: 200px; max-height: 200px;" />';
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        </script>
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</body>
+</html>

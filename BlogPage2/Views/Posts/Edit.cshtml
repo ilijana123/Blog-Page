@@ -1,0 +1,128 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using BlogPage2.Areas.Identity.Data
+@inject UserManager<BlogPage2User> UserManager
+@model BlogPage2.ViewModels.PostTagCategoryEditViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit Post</h1>
+
+<h4>Post</h4>
+<hr />
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <form asp-action="Edit" enctype="multipart/form-data" id="editForm" class="p-4 bg-light shadow-sm rounded">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Post.Id" />
+            <input type="hidden" asp-for="ExistingImagePath" />
+            <div class="form-group">
+                <label asp-for="Post.Title" class="control-label"></label>
+                <input asp-for="Post.Title" class="form-control" />
+                <span asp-validation-for="Post.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Post.File" class="control-label">Choose Image</label>
+                <input type="file" asp-for="Post.File" class="form-control-file" id="imageFile" accept="image/*" onchange="previewImage(event)" />
+                <span asp-validation-for="Post.File" class="text-danger"></span>
+            </div>
+            <div id="imagePreview" class="mb-3">
+                @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+                {
+                    <div>
+                        <p>Current Image:</p>
+                        <img src="@Url.Content("~/images/" + Model.ExistingImagePath)" alt="Current Image" class="img-thumbnail" />
+                        <div class="mt-2">
+                            <label>
+                                <input type="checkbox" asp-for="DeleteImage" />
+                                Delete current image
+                            </label>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="Post.AppUser" value="@UserManager.GetUserId(User)" />
+                <label class="control-label">Username</label>
+                <input type="text" class="form-control" value="@UserManager.GetUserName(User)" readonly>
+            </div>
+            <div class="form-group">
+                <label asp-for="Post.PostContent" class="control-label"></label>
+                <textarea asp-for="Post.PostContent" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Post.PostContent" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedTags" class="control-label">Tags</label>
+                <select asp-for="SelectedTags" asp-items="Model.TagList" class="form-control" multiple="multiple"></select>
+                <span asp-validation-for="SelectedTags" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedCategories" class="control-label">Categories</label>
+                <select asp-for="SelectedCategories" asp-items="Model.CategoryList" class="form-control" multiple="multiple"></select>
+                <span asp-validation-for="SelectedCategories" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NewTag" class="control-label">New Tags (space separated, start with #)</label>
+                <input asp-for="NewTag" class="form-control" />
+                <span asp-validation-for="NewTag" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NewCategory" class="control-label">New Categories (space separated)</label>
+                <input asp-for="NewCategory" class="form-control" />
+                <span asp-validation-for="NewCategory" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-outline-dark">Save</button>
+                    <a asp-action="Index" class="btn btn-outline-dark">Back to List</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                var output = document.getElementById('imagePreview');
+                output.innerHTML = '<img src="' + reader.result + '" class="img-thumbnail" />';
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    h1, h4 {
+        text-align: center;
+    }
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .img-thumbnail {
+        max-width: 250px;
+        max-height: 250px;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    }
+</style>

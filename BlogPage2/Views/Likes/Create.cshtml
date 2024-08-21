@@ -1,0 +1,43 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using BlogPage2.Areas.Identity.Data
+@inject UserManager<BlogPage2User> UserManager
+@inject SignInManager<BlogPage2User> SignInManager
+@model BlogPage2.Models.Like
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Like</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="PostId" class="control-label">Post</label>
+                <select asp-for="PostId" class="form-control" asp-items="ViewBag.PostId"></select>
+                <span asp-validation-for="PostId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="AppUser" value="@UserManager.GetUserId(User)" />
+                <label class="control-label">Username</label>
+                <input type="text" class="form-control" value="@UserManager.GetUserName(User)" readonly>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

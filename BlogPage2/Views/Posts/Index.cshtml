@@ -1,0 +1,373 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using BlogPage2.Areas.Identity.Data
+
+@inject UserManager<BlogPage2User> UserManager
+
+@model BlogPage2.ViewModels.PostCategoryTagViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" data-hot-reload="false">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<h1>Blog Page</h1>
+@if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+{
+    <div class="filter-section">
+        <a asp-action="Create" class="btn btn-light create-new-btn">Create New</a>
+    </div>
+}
+    <div>
+        <form asp-controller="Posts" asp-action="Index" method="get" class="d-inline">
+            <button type="submit" class="btn btn-light">Show All Posts</button>
+        </form>
+    </div>
+    <br/>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <form asp-controller="Posts" asp-action="Index" method="get" class="filter-form">
+            <label for="postCategory">Categories:</label>
+            <select asp-for="PostCategory" asp-items="Model.Categories" class="form-control">
+                <option value="All Categories">All Categories</option>
+            </select>
+            <button class="btn btn-outline-secondary mt-2" type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <form asp-controller="Posts" asp-action="Index" method="get" class="filter-form">
+            <label for="postTag">Tags:</label>
+            <select asp-for="PostTag" asp-items="Model.Tags" class="form-control">
+                <option value="All Tags">All Tags</option>
+            </select>
+            <button class="btn btn-outline-secondary mt-2" type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <form asp-controller="Posts" asp-action="Index" method="get" class="filter-form">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search by Category" aria-label="Search by Category" aria-describedby="button-addon2" asp-for="SearchStringC">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <form asp-controller="Posts" asp-action="Index" method="get" class="filter-form">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search by Tag" aria-label="Search by Tag" aria-describedby="button-addon2" asp-for="SearchStringT">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<br />
+<div class="sort-section">
+    <strong>Sort by:</strong>
+    <a asp-action="Index" asp-route-sortOrder="likes_desc" class="btn btn-link sort-link"><button type="button" class="btn btn-outline-secondary">Likes (desc)</button></a> 
+    <a asp-action="Index" asp-route-sortOrder="likes_asc" class="btn btn-link sort-link"><button type="button" class="btn btn-outline-secondary">Likes (asc)</button></a> 
+    <a asp-action="Index" asp-route-sortOrder="comments_desc" class="btn btn-link sort-link"><button type="button" class="btn btn-outline-secondary">Comments (desc)</button></a> 
+    <a asp-action="Index" asp-route-sortOrder="comments_asc" class="btn btn-link sort-link"><button type="button" class="btn btn-outline-secondary">Comments (asc)</button></a>
+</div>
+<br />
+<div class="row">
+    @foreach (var item in Model.Posts)
+    {
+        <div class="col-md-6 mb-3">
+            <div class="post-container rounded border p-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="@Url.Content("~/images/" + item.Image)" alt="Image" class="post-image img-fluid rounded" />
+                    </div>
+                    <div class="col-md-8 details-section">
+                        <h4>@Html.DisplayFor(modelItem => item.Title)</h4>
+                            <p class="post-details">
+                            <strong>Created By: </strong> @await UserManager.FindByIdAsync(item.AppUser) <br />
+                            <strong>Created On:</strong> @item.CreatedOn.ToString()<br />
+                            <strong>Last Modified On:</strong> @item.LastModifiedOn?.ToString("yyyy-MM-dd HH:mm:ss")<br />
+                            <strong>Likes:</strong>
+                            <a href="javascript:void(0);" data-toggle="modal" data-target="#likesModal-@item.Id">
+                                <span id="likes-count-@item.Id">@item.Likes.Count</span>
+                            </a><br />
+                                <strong>Comments:</strong>@item.Comments.Count<br />
+                            </p>
+                        <div class="modal fade" id="likesModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="likesModalLabel-@item.Id" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="likesModalLabel-@item.Id">People who liked this post</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <ul>
+                                            @foreach (var like in item.Likes)
+                                            {
+                                                <li>@await UserManager.FindByIdAsync(like.AppUser)</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-dark btn-sm action-link">Details</a>
+                        @if (ViewBag.CurrentUserId == item.AppUser)
+                        {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-dark btn-sm action-link">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-dark btn-sm action-link">Delete</a>
+                        }
+                        </div>
+                        <br/>
+                        <div class="d-flex align-items-center">
+                            @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+                            {
+                                <form asp-controller="Comments" asp-action="Create" method="get">
+                                    <input type="hidden" name="postId" value="@item.Id" />
+                                    <button accesskey="submit" class="btn btn-light add-comment-btn">Add Comment</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div>
+                                    <a class="btn btn-outline-dark ml-2" href="/Identity/Account/Login">Login to Add a Comment</a>
+                                </div>
+                            }
+
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                var liked = Model.IsLiked.ContainsKey(item.Id) && Model.IsLiked[item.Id];
+                                <button type="button" class="btn like-button ml-2" data-post-id="@item.Id">
+                                    <i class="bi @(liked ? "bi-heart-fill" : "bi-heart")" aria-hidden="true"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <div>
+                                    <a class="btn btn-outline-dark ml-2" href="/Identity/Account/Login">Login to Like A Post</a>
+                                </div>
+                            }
+
+                            @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+                            {
+                                <form asp-controller="UserPs" asp-action="Create" method="post" class="ml-2">
+                                    <input type="hidden" name="postId" value="@item.Id" />
+                                    <button type="submit" class="btn btn-light save-button">
+                                        <i class="bi bi-save"></i>
+                                    </button>
+                                </form>
+                            }
+                            else if (!User.IsInRole("Admin"))
+                            {
+                                <div>
+                                    <a class="btn btn-outline-dark ml-2" href="/Identity/Account/Login">Login to Save</a>
+                                </div>
+                                
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+ </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<script>
+    $(document).ready(function () {
+        let isProcessing = false;
+
+        $('.like-button').click(function () {
+            if (isProcessing) return;
+
+            isProcessing = true;
+            var button = $(this);
+            var postId = button.data('post-id');
+            var icon = button.find('i');
+
+            var currentLikesSpan = $('#likes-count-' + postId);
+            var currentLikes = parseInt(currentLikesSpan.text());
+
+            var liked = icon.hasClass('bi-heart-fill');
+            var newLikesCount = liked ? currentLikes - 1 : currentLikes + 1;
+
+            icon.toggleClass('bi-heart bi-heart-fill');
+
+            currentLikesSpan.text(newLikesCount);
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("Create", "Likes")',
+                data: {
+                    postId: postId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (!response.success) {
+                        icon.toggleClass('bi-heart bi-heart-fill');
+                        currentLikesSpan.text(liked ? currentLikes + 1 : currentLikes - 1);
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX request failed: " + status + ", " + error);
+                    icon.toggleClass('bi-heart bi-heart-fill');
+                    currentLikesSpan.text(liked ? currentLikes + 1 : currentLikes - 1);
+                    alert("An error occurred while liking the post.");
+                },
+                complete: function () {
+                    isProcessing = false;
+                }
+            });
+        });
+
+        $.noConflict();
+
+        $('.modal').on('shown.bs.modal', function () {
+            $(this).find('.close').on('click', function () {
+                $(this).closest('.modal').modal('hide');
+            });
+        });
+
+        $('.modal').on('click', function (e) {
+            if ($(e.target).hasClass('modal')) {
+                $(this).modal('hide');
+            }
+        });
+    });
+</script>
+
+
+<style>
+    body {
+        background-color: #f0f4f8;
+        padding: 20px;
+        font-family: 'Helvetica Neue', sans-serif;
+        color: #333;
+    }
+
+    h1 {
+        color: #2c3e50;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .details-section {
+        padding: 10px;
+    }
+
+    .action-link {
+        margin-right: 5px;
+        color: #ffffff;
+        background-color: #2c3e50;
+        padding: 5px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .action-link:hover {
+            background-color: #1a252f;
+            text-decoration: underline;
+        }
+
+    .post-container {
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+
+        .post-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .post-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    .details-section {
+        padding: 10px;
+    }
+
+    .action-link {
+        margin-right: 5px;
+        color: #ffffff;
+        background-color: #2c3e50;
+        padding: 5px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .action-link:hover {
+            background-color: #1a252f;
+            text-decoration: underline;
+        }
+    .heart-icon {
+        font-size: 24px;
+        color: grey;
+        cursor: pointer;
+    }
+
+        .heart-icon.liked {
+            color: #e74c3c;
+        }
+
+    .like-button, .save-button {
+        background-color: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+        .like-button:hover, .save-button:hover {
+            color: #e74c3c;
+        }
+
+    .create-new-btn {
+        background-color:bisque;
+        color: #fff;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .create-new-btn:hover {
+            background-color:burlywood;
+        }
+    .add-comment-btn {
+        color: black;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+        border-color:antiquewhite;
+    }
+
+        .add-comment-btn:hover {
+            background-color:burlywood;
+        }
+
+</style> 

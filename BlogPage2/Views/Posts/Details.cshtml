@@ -1,0 +1,277 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using BlogPage2.Areas.Identity.Data
+
+@inject UserManager<BlogPage2User> UserManager
+@model BlogPage2.ViewModels.PostDetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header text-center">
+            <h1>@Model.Post.Title</h1>
+        </div>
+        <div class="card-body">
+            <h4>Post Details</h4>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-3">Created By</dt>
+                <dd class="col-sm-9">
+                    @{
+                        var user = await UserManager.FindByIdAsync(Model.Post.AppUser);
+                        if (user != null)
+                        {
+                            @user.UserName
+                        }
+                        else
+                        {
+                            <span>User not found</span>
+                        }
+                    }
+                </dd>
+                <dt class="col-sm-3">Last Modified On</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Post.LastModifiedOn)</dd>
+                <dt class="col-sm-3">Created On</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Post.CreatedOn)</dd>
+                <dt class="col-sm-3">Content</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Post.PostContent)</dd>
+                <dt class="col-sm-3"></dt>
+                <dd class="col-sm-9">
+                    @if (!string.IsNullOrEmpty(Model.Post.Image))
+                    {
+                        <img src="~/images/@Model.Post.Image" alt="Image" class="img-fluid rounded post-image" />
+                    }
+                    else
+                    {
+                        <p>No image available</p>
+                    }
+                </dd>
+                <dt class="col-sm-3">Categories</dt>
+                <dd class="col-sm-9">
+                    @foreach (var category in Model.Post.Categories)
+                    {
+                        <a asp-controller="Categories" asp-action="Details" asp-route-id="@category.CategoryId">@category.Category.Title</a> <br />
+                    }
+                </dd>
+                <dt class="col-sm-3">Tags</dt>
+                <dd class="col-sm-9">
+                    @foreach (var tag in Model.Post.Tags)
+                    {
+                        <a asp-controller="Tags" asp-action="Details" asp-route-id="@tag.TagId">@tag.Tag.Title</a> <br />
+                    }
+                </dd>
+            </dl>
+            <div class="text-muted">
+                <strong>Comments:</strong> @Model.Post.Comments.Count
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+            {
+                <form asp-controller="UserPs" asp-action="Create" method="post" class="d-inline">
+                    <input type="hidden" name="postId" value="@Model.Post.Id" />
+                    <button type="submit" class="btn btn-light">
+                        <i class="bi bi-save"></i>
+                    </button>
+                </form>
+            }
+            else if (!User.IsInRole("Admin"))
+            {
+                <a class="btn btn-success" href="/Identity/Account/Login">Login to Save</a>
+            }
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button type="button" class="btn like-button" data-post-id="@Model.Post.Id">
+                    <i class="bi @(Model.IsLiked ? "bi-heart-fill" : "bi-heart")" aria-hidden="true"></i>
+                </button>
+            }
+            else
+            {
+                <a class="btn btn-success" href="/Identity/Account/Login">Login to Like A Post</a>
+            }
+            <div>
+                <strong>Likes:</strong> <span class="likes-count">@Model.Post.Likes.Count</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h4>Comments</h4>
+        <hr />
+        <div class="row">
+            @if (Model.Post.Comments != null && Model.Post.Comments.Any())
+            {
+                @foreach (var comment in Model.Post.Comments.Where(c => !Model.ReplyIds.Contains(c.Id)))
+                {
+                    <div class="col-md-12 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">@await UserManager.FindByIdAsync(comment.AppUser)</h5>
+                                <p class="card-text">@comment.CommentContent</p>
+                                @if (comment.Image != null)
+                                {
+                                    <img src="@Url.Content("~/images/" + comment.Image)" alt="Image" class="img-fluid rounded comment-image" />
+                                }
+
+                                <p>
+                                    <strong>Created On:</strong> @comment.CreatedOn?.ToString("yyyy-MM-dd HH:mm:ss")<br />
+                                    <strong>Last Modified On:</strong> @comment.LastModifiedOn?.ToString("yyyy-MM-dd HH:mm:ss")
+                                </p>
+                                @if (User.Identity.IsAuthenticated && UserManager.GetUserId(User) == comment.AppUser)
+                                {
+                                    <a href="@Url.Action("Edit", "Comments", new { id = comment.Id })" class="btn btn-outline-secondary">Edit</a>
+                                    <form asp-controller="Comments" asp-action="Delete" method="post" class="delete-form d-inline">
+                                        <input type="hidden" name="id" value="@comment.Id" />
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                }
+                            </div>
+
+                            @if (comment.Comments != null && comment.Comments.Any())
+                            {
+                                <div class="ml-5 reply-container">
+                                    @foreach (var reply in comment.Comments)
+                                    {
+                                        <div class="card mt-3 reply-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">@await UserManager.FindByIdAsync(reply.AppUser)</h5>
+                                                <p class="card-text">@reply.CommentContent</p>
+                                                @if (reply.Image != null)
+                                                {
+                                                    <img src="@Url.Content("~/images/" + reply.Image)" alt="Image" class="img-fluid rounded" />
+                                                }
+                                                <p>
+                                                    <strong>Created On:</strong> @reply.CreatedOn?.ToString("yyyy-MM-dd HH:mm:ss")<br />
+                                                    <strong>Last Modified On:</strong> @reply.LastModifiedOn?.ToString("yyyy-MM-dd HH:mm:ss")
+                                                </p>
+                                                @if (User.Identity.IsAuthenticated && UserManager.GetUserId(User) == reply.AppUser)
+                                                {
+                                                    <a href="@Url.Action("Edit", "Comments", new { id = reply.Id })" class="btn btn-outline-secondary">Edit</a>
+                                                    <form asp-controller="Comments" asp-action="Delete" method="post" class="delete-form d-inline">
+                                                        <input type="hidden" name="id" value="@reply.Id" />
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+
+                            @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin") && comment.ParentCommentId == null)
+                            {
+                                <form asp-controller="Comments" asp-action="CreateR" method="get">
+                                    <input type="hidden" name="postId" value="@Model.Post.Id" />
+                                    <input type="hidden" name="parentCommentId" value="@comment.Id" />
+                                    <button type="submit" class="btn btn-outline-secondary">Reply</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No comments yet.</p>
+            }
+            @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+            {
+                <form asp-controller="Comments" asp-action="Create" method="get">
+                    <input type="hidden" name="postId" value="@Model.Post.Id" />
+                    <button type="submitclass=" btn btn-outline-secondary">Add Comment</button>
+                </form>
+            }
+            else
+            {
+                <a class="btn btn-success" href="/Identity/Account/Login">Login to Add a Comment</a>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        @if (ViewBag.CurrentUserId == Model.Post.AppUser)
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Post.Id" class="btn btn-outline-dark">Edit</a>
+            <a asp-action="Index" class="btn btn-outline-dark">Back to List</a>
+        }
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.like-button').click(function () {
+            var button = $(this);
+            var postId = button.data('post-id');
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("Create", "Likes")',
+                data: {
+                    postId: postId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        var icon = button.find('i');
+                        icon.toggleClass('bi-heart bi-heart-fill');
+                        var likesCountSpan = $('.likes-count');
+                        var currentLikes = parseInt(likesCountSpan.text());
+                        likesCountSpan.text(response.isLiked ? currentLikes + 1 : currentLikes - 1);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX request failed: " + status + ", " + error);
+                    alert("An error occurred while processing your request.");
+                }
+            });
+        });
+    });
+</script>
+
+
+
+        <style>
+            .post-image {
+                max-width: 40%;
+            }
+
+            .comment-image {
+                max-width: 20%;
+            }
+            .like-button {
+                background: none;
+                border: none;
+                padding: 0;
+                cursor: pointer;
+            }
+
+            .heart-icon {
+                font-size: 24px;
+                color: grey;
+            }
+
+                .heart-icon.liked {
+                    color: red;
+                }
+
+            .loading-spinner {
+                animation: spin 1s linear infinite;
+            }
+
+            .reply-container {
+                margin-left: 50px;
+            }
+
+            .reply-card {
+                margin-left: 30px;
+                border-left: 2px solid #ccc;
+            }
+        </style>
