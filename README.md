@@ -1,5 +1,22 @@
-# BlogPage2
-Blog Page using .NET Framework written in C# and using Microsoft SQL Server. This website has functionalities like adding a new post for authenticated users, liking posts and adding a comments for posts. If the logged user is the one who has posted the content, he can edit it or delete it. Also authenticated user can like and unlike posts and edit or delete his own comments. Authenticated users can also reply to a comment. Adding comments and posts also contains a image upload and while editing the post or the comment you can upload a different image and you can have a preview of that image before posting it. Even if you are not logged in to the website you can see the likes and comments count for each post, you can see the creators of the posts and the comments and when you click on the likes counter, you can see which people have liked certain post. You can sort the posts by number of likes or comments, in ascending or descending order. You can also search the posts by categories or tags. There is list of posts for each category an each tag. The user is able to add new tags and new categories while creating a new post. Users can also save posts to see them later. There is also information about when the post or the comment is created and when it is edited it shows the time last modified on time and date.
+# BlogPage
+
+## Tech Stack
+- .NET Framework(C#)
+-  Microsoft SQL Server
+  
+## Functionalities
+- Adding a new post for authenticated users
+- Liking/Unliking posts and adding/deleting/editing a comments for posts with authentication
+- If the logged user is the one who has posted the content, he can edit it or delete it.
+- Authenticated users can also reply to a comment.
+- Adding comments and posts contains an image upload section with a preview option 
+- Publicly available likes and comments count for each post, you can see the creators of the posts and the comments and when you click on the likes counter, you can see which people have liked certain post.
+- Sorting the posts by number of likes or comments, in ascending or descending order.
+- Serching the posts by categories or tags.
+- There is list of posts for each category an each tag.
+- The user is able to add new tags and new categories while creating a new post.
+- Authenticated users can also save posts to see them later.
+- There is also information about when the post or the comment is created and when it is edited it shows the time last modified on time and date.
 ![image](https://github.com/user-attachments/assets/8b5968b8-80f2-405c-9999-9eafa124e183)
 ![image](https://github.com/user-attachments/assets/bd2256ca-7996-48fc-8540-05d2acd40d4c)
 ![image](https://github.com/user-attachments/assets/29aca28e-c16b-4205-b5c8-ae482e3085a3)
