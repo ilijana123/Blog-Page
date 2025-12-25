@@ -1,8 +1,9 @@
-# BlogPage
+# BlogPage(MVC Architecture)
 
 ## Tech Stack
 - .NET Framework(C#)
 -  Microsoft SQL Server
+-  HTML, CSS, JS
   
 ## Functionalities
 - Adding a new post for authenticated users
