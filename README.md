@@ -1,4 +1,4 @@
-# BlogPage(MVC Architecture)
+# Blog Page(MVC Architecture)
 
 ## Tech Stack
 - .NET Framework(C#)
